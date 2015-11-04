@@ -1,27 +1,21 @@
-from init import *
-
+import init
+from sympy.geometry import *
+import rrt
+import random
 
 class Map:
   def __init__(self):
-    global map_width
-    global map_height
-    global robot_radius
-    global number_of_obstacles
-    global number_of_robots
-    global growth_factor
-    global chance_expand_goal
     self.obstacles = []
     self.robots = []
-    
 
-  def generate_random_map(self, num_obstacles, num_robots):
-    self.generate_random_obstacles(num_obstacles)
-    self.generate_robots(num_robots)
+  def generate_random_map(self):
+    self.generate_random_obstacles(init.number_of_obstacles)
+    self.generate_robots(init.number_of_robots)
     
   def generate_random_obstacles(self, num):
     while(num>0):
       flag = False
-      point1 = Point(random.randint(0,map_width-1000),random.randint(0,map_height-1000))
+      point1 = Point(random.randint(0,init.map_width-1000),random.randint(0,init.map_height-1000))
       w = random.randint(1000, 2000)
       h = random.randint(1000, 2000)
 
@@ -40,39 +34,31 @@ class Map:
     global robot_radius
     while(num > 0):
       flag = False
-      location = Point(random.randint(100,map_width),random.randint(100,map_height))
-      goal = Point(random.randint(100,map_width),random.randint(100,map_height))
+      location = Point(random.randint(100,init.map_width),random.randint(100,init.map_height))
+      goal = Point(random.randint(100,init.map_width),random.randint(100,init.map_height))
       for obstacle in self.obstacles:
         if(obstacle.get_polygon().encloses_point(location)) or (obstacle.get_polygon().encloses_point(goal)):
           flag = True
           break
       if not flag:
-        self.robots.append(Robot(location,goal,robot_radius, self.growth_factor, self.chance_expand_goal))
+        self.robots.append(rrt.Robot(location, goal, num))
         num -= 1
         print "added obstacle"
 
   def sample_node(self):
-    point = Point(random.randint(0,map_width),random.randint(0,map_height))
-    node = TreeNode(point, 0.0, None, None)
-    #need to check if node is inside(or too close to) the obstacle, if yes then re-sample
+    point = Point(random.randint(0,init.map_width),random.randint(0,init.map_height))
+    node = rrt.TreeNode(point, 0.0, None, None)
     return node
 
-    
+  def restart_map(self):
+    self.obstacles = []
+    self.robots = []
 
-    
-    
-class TreeNode:
-  def __init__(self, point, time, velocity, acceleration):
-    self.children = []
-    self.point  = point
-    self.time = time
-    self.velocity = velocity
-    self.acceleration = acceleration
-    self.parent = None
-  def add_child(self, TreeNode):
-    self.children.append(TreeNode)
-  def __str__(self):
-    return self.point, self.time,  self.velocity, self.acceleration
+  def set_obstacles(self, obstacles):
+    self.obstacles = obstacles
+
+  def set_robots(self, robots):
+    self.robots = robots
 
     
 
@@ -104,17 +90,5 @@ class Obstacle:
     #checks if line between p1 and p2 is blocked by an obstacle
     pass
 
-class Vector:
-  def __init__(self, x,y):
-    self.x = float(x)
-    self.y = float(y)
-  def add(self, vec):
-    return Vector(self.x+vec.x, self.y+vec.y)
-  def subtract(self, vec):
-    return Vector(self.x-vec.x, self.y-vec.y)
-  def length(self):
-    return math.sqrt(self.x**2+self.y**2)
-  def divide(self, d):
-    self.x = self.x/d
-    self.y = self.y/d
+
 

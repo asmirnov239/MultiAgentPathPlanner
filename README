@@ -1,1 +1,4 @@
-This is an initial outline of the classes.
+Multi agent simulator for path planning that uses Rapidly Expanding Random Trees.
+
+To run the simulator:
+python main.py
